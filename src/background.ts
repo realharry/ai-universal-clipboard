@@ -57,7 +57,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId === 'save-to-clipboard' && info.selectionText && tab?.id) {
+  if (info.menuItemId === 'save-to-clipboard' && info.selectionText) {
     try {
       const result = await chrome.storage.local.get(['clips']);
       const clips = result.clips || [];
@@ -74,14 +74,18 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       clips.unshift(newClip);
       await chrome.storage.local.set({ clips });
       
-      // Show notification or badge
-      chrome.action.setBadgeText({ text: clips.length.toString(), tabId: tab.id });
-      chrome.action.setBadgeBackgroundColor({ color: '#4ade80', tabId: tab.id });
+      console.log('Successfully saved clip from context menu:', newClip);
       
-      // Clear badge after 2 seconds
-      setTimeout(() => {
-        chrome.action.setBadgeText({ text: '', tabId: tab.id });
-      }, 2000);
+      // Show notification or badge only if we have a valid tab ID
+      if (tab?.id !== undefined && tab.id >= 0) {
+        chrome.action.setBadgeText({ text: clips.length.toString(), tabId: tab.id });
+        chrome.action.setBadgeBackgroundColor({ color: '#4ade80', tabId: tab.id });
+        
+        // Clear badge after 2 seconds
+        setTimeout(() => {
+          chrome.action.setBadgeText({ text: '', tabId: tab.id });
+        }, 2000);
+      }
       
     } catch (error) {
       console.error('Error saving clip from context menu:', error);
