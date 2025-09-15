@@ -2,41 +2,65 @@
 
 let isSelectionMode = false;
 
-// Listen for messages from the popup/sidepanel
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === 'TOGGLE_SELECTION_MODE') {
-    isSelectionMode = !isSelectionMode;
-    updateSelectionMode();
-    sendResponse({ success: true });
-  }
-  return true;
-});
+console.log('AI Universal Clipboard content script loaded');
 
-// Handle text selection
-document.addEventListener('mouseup', () => {
-  const selection = window.getSelection();
-  if (selection && selection.toString().trim()) {
-    // Show a small popup or indicator that text can be saved
-    showSelectionIndicator(selection);
-  }
-});
+// Ensure DOM is ready
+function initializeContentScript() {
+  console.log('Initializing content script...');
+  
+  // Listen for messages from the popup/sidepanel
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message.type === 'TOGGLE_SELECTION_MODE') {
+      isSelectionMode = !isSelectionMode;
+      updateSelectionMode();
+      sendResponse({ success: true });
+    }
+    return true;
+  });
 
-// Handle right-click context menu for saving selections
-document.addEventListener('contextmenu', (_event) => {
-  const selection = window.getSelection();
-  if (selection && selection.toString().trim()) {
-    // We could add a context menu item here, but for now we'll use a keyboard shortcut
-  }
-});
+  // Handle text selection
+  document.addEventListener('mouseup', () => {
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim()) {
+      // Show a small popup or indicator that text can be saved
+      showSelectionIndicator(selection);
+    }
+  });
 
-// Listen for keyboard shortcuts
-document.addEventListener('keydown', (event) => {
-  // Ctrl+Shift+S to save selection
-  if (event.ctrlKey && event.shiftKey && event.key === 'S') {
-    event.preventDefault();
+  // Handle right-click context menu for saving selections
+  document.addEventListener('contextmenu', (_event) => {
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim()) {
+      // We could add a context menu item here, but for now we'll use a keyboard shortcut
+    }
+  });
+
+  // Listen for keyboard shortcuts
+  document.addEventListener('keydown', (event) => {
+    // Ctrl+Shift+C to save selection (changed from S to C to avoid conflicts)
+    if (event.ctrlKey && event.shiftKey && event.key === 'C') {
+      console.log('Keyboard shortcut Ctrl+Shift+C detected!');
+      event.preventDefault();
+      event.stopPropagation();
+      saveCurrentSelection();
+    }
+  }, true); // Use capture phase to ensure we get the event first
+  
+  console.log('Content script initialized successfully');
+  
+  // Add a global test function for debugging
+  (window as any).testClipboardSave = function() {
+    console.log('Testing clipboard save function...');
     saveCurrentSelection();
-  }
-});
+  };
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeContentScript);
+} else {
+  initializeContentScript();
+}
 
 function showSelectionIndicator(selection: Selection) {
   // Remove any existing indicators
@@ -89,7 +113,10 @@ function saveCurrentSelection() {
   const selection = window.getSelection();
   const selectedText = selection?.toString().trim();
   
+  console.log('saveCurrentSelection called, selectedText:', selectedText);
+  
   if (selectedText) {
+    console.log('Attempting to send message to background script...');
     // Send to background script
     chrome.runtime.sendMessage({
       type: 'SAVE_SELECTION',
@@ -100,12 +127,16 @@ function saveCurrentSelection() {
         url: window.location.href
       }
     }, (response) => {
+      console.log('Response from background script:', response);
       if (response && response.success) {
         showSaveConfirmation();
       } else {
         showSaveError();
       }
     });
+  } else {
+    console.log('No text selected, showing error');
+    showSaveError();
   }
 }
 

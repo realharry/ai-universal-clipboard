@@ -8,9 +8,12 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 // Listen for messages from content script
 chrome.runtime.onMessage.addListener(async (message, _sender, sendResponse) => {
+  console.log('Background script received message:', message);
+  
   if (message.type === 'SAVE_SELECTION') {
     // Store the clip data directly since we can't reliably forward to sidepanel
     try {
+      console.log('Attempting to save selection to storage...');
       const result = await chrome.storage.local.get(['clips']);
       const clips = result.clips || [];
       
@@ -25,6 +28,8 @@ chrome.runtime.onMessage.addListener(async (message, _sender, sendResponse) => {
       
       clips.unshift(newClip);
       await chrome.storage.local.set({ clips });
+      
+      console.log('Successfully saved clip:', newClip);
       
       // Send response back to content script
       sendResponse({ success: true, clip: newClip });

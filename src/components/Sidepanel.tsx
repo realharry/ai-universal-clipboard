@@ -185,7 +185,7 @@ export const Sidepanel: React.FC = () => {
       {/* Footer */}
       <div className="bg-white border-t border-gray-200 p-3">
         <p className="text-xs text-gray-500 text-center">
-          Select text on any page and press <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl+Shift+S</kbd> to save
+          Select text on any page and press <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl+Shift+C</kbd> to save
         </p>
       </div>
     </div>
