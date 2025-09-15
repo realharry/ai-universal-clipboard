@@ -99,11 +99,42 @@ function saveCurrentSelection() {
         title: selectedText.substring(0, 50) + (selectedText.length > 50 ? '...' : ''),
         url: window.location.href
       }
+    }, (response) => {
+      if (response && response.success) {
+        showSaveConfirmation();
+      } else {
+        showSaveError();
+      }
     });
-    
-    // Show confirmation
-    showSaveConfirmation();
   }
+}
+
+function showSaveError() {
+  const error = document.createElement('div');
+  error.innerHTML = `
+    <div style="
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #ef4444;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      z-index: 10000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    ">
+      ❌ Failed to save clip
+    </div>
+  `;
+  
+  document.body.appendChild(error);
+  
+  setTimeout(() => {
+    if (error.parentNode) {
+      error.remove();
+    }
+  }, 3000);
 }
 
 function showSaveConfirmation() {

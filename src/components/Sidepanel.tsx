@@ -16,16 +16,16 @@ export const Sidepanel: React.FC = () => {
     loadClips();
   }, []);
 
-  // Listen for clips added from content script
+  // Listen for storage changes to refresh when clips are added via keyboard shortcut
   useEffect(() => {
-    const handleMessage = (message: any) => {
-      if (message.type === 'ADD_CLIP_FROM_CONTENT') {
-        handleAddClipFromContent(message.payload);
+    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      if (changes.clips) {
+        loadClips();
       }
     };
 
-    chrome.runtime.onMessage.addListener(handleMessage);
-    return () => chrome.runtime.onMessage.removeListener(handleMessage);
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    return () => chrome.storage.onChanged.removeListener(handleStorageChange);
   }, []);
 
   // Listen for copy events to show toast
@@ -61,15 +61,6 @@ export const Sidepanel: React.FC = () => {
     } catch (error) {
       console.error('Error adding clip:', error);
       showToast('Failed to add clip');
-    }
-  };
-
-  const handleAddClipFromContent = async (clipData: any) => {
-    try {
-      await storage.addClip(clipData);
-      await loadClips();
-    } catch (error) {
-      console.error('Error adding clip from content:', error);
     }
   };
 

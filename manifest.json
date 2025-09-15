@@ -6,7 +6,8 @@
   "permissions": [
     "sidePanel",
     "activeTab",
-    "storage"
+    "storage",
+    "contextMenus"
   ],
   "action": {
     "default_title": "Open Clipboard"

@@ -22,8 +22,8 @@ export const ClipItem: React.FC<ClipItemProps> = ({ clip, onDelete }) => {
     onDelete(clip.id);
   };
 
-  const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp);
+  const formatTimestamp = (createdAt: string) => {
+    const date = new Date(createdAt);
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
     
@@ -50,7 +50,7 @@ export const ClipItem: React.FC<ClipItemProps> = ({ clip, onDelete }) => {
             ) : (
               <Image size={14} className="text-green-500 flex-shrink-0" />
             )}
-            <span className="text-xs text-gray-500">{formatTimestamp(clip.timestamp)}</span>
+            <span className="text-xs text-gray-500">{formatTimestamp(clip.createdAt)}</span>
           </div>
           
           {clip.title && (
